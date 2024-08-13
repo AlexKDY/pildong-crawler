@@ -502,15 +502,15 @@ def crawl_basketball_player():
                         # HTML 소스 파싱
                         soup = BeautifulSoup(response.text, 'html.parser')  
                         player_record['name'] = soup.select_one('div.playerBasic.mb60 td.person p').text.strip()
-                        date_str = soup.select_one('div.playerBasic.mb60 div.right tr:nth-of-type(1) td:nth-of-type(1)').text.strip()
-                        date_obj = datetime.strptime(date_str, '%Y년 %m월 %d일').date()
-                        player_record['birthday'] = date_obj.strftime("%Y-%m-%d")
+                        player_record['birthday'] = soup.select_one('div.playerBasic.mb60 div.right tr:nth-of-type(1) td:nth-of-type(1)').text.strip()
                         player_record['no'] =  int(soup.select_one('div.playerBasic.mb60 td.person strong').text.strip().replace('#', '').strip())
                         player_record['position'] = soup.select_one('div.playerBasic.mb60 div.right tr:nth-of-type(3) td:nth-of-type(1)').text.strip()
-                        player_record['id'] =  f"{player_record['name']} {date_str}"
+                        player_record['id'] =  f"{player_record['name']} {player_record['birthday']}"
                         height = soup.select_one('div.playerBasic.mb60 div.right tr:nth-of-type(2) td:nth-of-type(1)').text.strip()
                         weight = soup.select_one('div.playerBasic.mb60 div.right tr:nth-of-type(2) td:nth-of-type(2)').text.strip()
                         player_record['physical_info'] = {'height': height, 'weight': weight}
+                        player_record['highschool'] = soup.select_one('div.playerBasic.mb60 div.right tr:nth-of-type(4) td:nth-of-type(1)').text.strip()
+                        player_record['img'] = soup.select_one('div.playerBasic.mb60 td.img img')['src']
 
                         years_divs = soup.select('div.playerCase_Scroll')
                         years_div = years_divs[2]
@@ -593,16 +593,16 @@ def crawl_baseball_player():
                         # HTML 소스 파싱
                         soup = BeautifulSoup(response.text, 'html.parser')  
                         player_record['name'] = soup.select_one('div.playerBasic.mb60 td.person p').text.strip()
-                        date_str = soup.select_one('div.playerBasic.mb60 div.right tr:nth-of-type(1) td:nth-of-type(1)').text.strip()
-                        date_obj = datetime.strptime(date_str, '%Y년 %m월 %d일').date()
-                        player_record['birthday'] = date_obj.strftime("%Y-%m-%d")
+                        player_record['birthday'] = soup.select_one('div.playerBasic.mb60 div.right tr:nth-of-type(1) td:nth-of-type(1)').text.strip()
                         player_record['no'] =  int(soup.select_one('div.playerBasic.mb60 td.person strong').text.strip().replace('#', '').strip())
                         player_record['position'] = soup.select_one('div.playerBasic.mb60 div.right tr:nth-of-type(3) td:nth-of-type(1)').text.strip()
-                        player_record['id'] =  f"{player_record['name']} {date_str}"
+                        player_record['id'] =  f"{player_record['name']} {player_record['birthday']}"
                         height = soup.select_one('div.playerBasic.mb60 div.right tr:nth-of-type(2) td:nth-of-type(1)').text.strip()
                         weight = soup.select_one('div.playerBasic.mb60 div.right tr:nth-of-type(2) td:nth-of-type(2)').text.strip()
                         player_record['physical_info'] = {'height': height, 'weight': weight}
-                        player_record['tuta'] = 0
+                        player_record['highschool'] = soup.select_one('div.playerBasic.mb60 div.right tr:nth-of-type(4) td:nth-of-type(1)').text.strip()
+                        player_record['img'] = soup.select_one('div.playerBasic.mb60 td.img img')['src']
+                        player_record['tuta'] =  0
 
                         years_divs = soup.select('div.playerCase_Scroll')
                         years_div = years_divs[2]
@@ -665,16 +665,16 @@ def crawl_baseball_player():
                         # HTML 소스 파싱
                         soup = BeautifulSoup(response.text, 'html.parser')  
                         player_record['name'] = soup.select_one('div.playerBasic.mb60 td.person p').text.strip()
-                        date_str = soup.select_one('div.playerBasic.mb60 div.right tr:nth-of-type(1) td:nth-of-type(1)').text.strip()
-                        date_obj = datetime.strptime(date_str, '%Y년 %m월 %d일').date()
-                        player_record['birthday'] = date_obj.strftime("%Y-%m-%d")
+                        player_record['birthday'] = soup.select_one('div.playerBasic.mb60 div.right tr:nth-of-type(1) td:nth-of-type(1)').text.strip()
                         player_record['no'] =  int(soup.select_one('div.playerBasic.mb60 td.person strong').text.strip().replace('#', '').strip())
                         player_record['position'] = soup.select_one('div.playerBasic.mb60 div.right tr:nth-of-type(3) td:nth-of-type(1)').text.strip()
-                        player_record['id'] =  f"{player_record['name']} {date_str}"
+                        player_record['id'] =  f"{player_record['name']} {player_record['birthday']}"
                         height = soup.select_one('div.playerBasic.mb60 div.right tr:nth-of-type(2) td:nth-of-type(1)').text.strip()
                         weight = soup.select_one('div.playerBasic.mb60 div.right tr:nth-of-type(2) td:nth-of-type(2)').text.strip()
                         player_record['physical_info'] = {'height': height, 'weight': weight}
-                        player_record['tuta'] = 0
+                        player_record['highschool'] = soup.select_one('div.playerBasic.mb60 div.right tr:nth-of-type(4) td:nth-of-type(1)').text.strip()
+                        player_record['img'] = soup.select_one('div.playerBasic.mb60 td.img img')['src']
+                        player_record['tuta'] = 1
                         
                         years_divs = soup.select('div.playerCase_Scroll')
                         years_div = years_divs[6]
@@ -702,12 +702,6 @@ def crawl_baseball_player():
                             id_list.append(player_record['id'])
                             player_data.append(player_record)
                         
-                        if player_record['id'] in hitter_list:
-                            for data in player_data:
-                                if data['id'] == player_record['id']:
-                                    data['tuta'] = 1
-                                    data['league_pitcher_record'] = league_record
-                                    data['tournament_pitcher_record'] = tournament_record
                                     
                     except requests.exceptions.HTTPError as http_err:
                         print(f"HTTP error occurred: {http_err} - player_url={player_url}")
@@ -759,16 +753,15 @@ def crawl_soccer_player():
                         # HTML 소스 파싱
                         soup = BeautifulSoup(response.text, 'html.parser')  
                         player_record['name'] = soup.select_one('div.playerBasic.mb60 td.person p').text.strip()
-                        date_str = soup.select_one('div.playerBasic.mb60 div.right tr:nth-of-type(1) td:nth-of-type(1)').text.strip()
-                        date_obj = datetime.strptime(date_str, '%Y년 %m월 %d일').date()
-                        player_record['birthday'] = date_obj.strftime("%Y-%m-%d")
+                        player_record['birthday'] = soup.select_one('div.playerBasic.mb60 div.right tr:nth-of-type(1) td:nth-of-type(1)').text.strip()
                         player_record['no'] =  int(soup.select_one('div.playerBasic.mb60 td.person strong').text.strip().replace('#', '').strip())
                         player_record['position'] = soup.select_one('div.playerBasic.mb60 div.right tr:nth-of-type(3) td:nth-of-type(1)').text.strip()
-                        player_record['id'] =  f"{player_record['name']} {date_str}"
+                        player_record['id'] =  f"{player_record['name']} {player_record['birthday']}"
                         height = soup.select_one('div.playerBasic.mb60 div.right tr:nth-of-type(2) td:nth-of-type(1)').text.strip()
                         weight = soup.select_one('div.playerBasic.mb60 div.right tr:nth-of-type(2) td:nth-of-type(2)').text.strip()
                         player_record['physical_info'] = {'height': height, 'weight': weight}
-
+                        player_record['highschool'] = soup.select_one('div.playerBasic.mb60 div.right tr:nth-of-type(4) td:nth-of-type(1)').text.strip()
+                        player_record['img'] = soup.select_one('div.playerBasic.mb60 td.img img')['src']
                         years_divs = soup.select('div.playerCase_Scroll')
                         years_div = years_divs[2]
                         record_key = ['nog', 'score', 'as', 'yellow', 'red']
@@ -816,7 +809,7 @@ def crawl_soccer_player():
 
 
 
-
+crawl_baseball_player()
 
 
 
