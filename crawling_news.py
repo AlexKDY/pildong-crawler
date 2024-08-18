@@ -4,10 +4,10 @@ from browsermobproxy import Server
 import psutil
 import time
 from selenium import webdriver
-import json
 from bs4 import BeautifulSoup
 from selenium.webdriver.chrome.options import Options
 import re
+import requests
 
 def process_kill(name):
     """중복 실행중인 프로세스 종료"""
@@ -36,7 +36,7 @@ def capture_network_traffic(url):
 
     driver.get(url)
     time.sleep(3)
-    for i in range(10):
+    for i in range(5):
         try:
             more_button = driver.find_element("css selector", '.btn_lst_more')
             driver.execute_script("arguments[0].scrollIntoView(true);", more_button)
@@ -63,18 +63,17 @@ def capture_network_traffic(url):
             xhr_responses.append(entry['response']['content']['text'])
     return xhr_responses
 
-def crawl_news_data(xhr_responses):
+def crawl_news_list(xhr_responses):
     """응답 데이터 가공"""
-    """XHR 요청의 JSON 응답 데이터 출력"""
-    description_list = []
+    news_list = []
     for i, response in enumerate(xhr_responses):
         news_links = re.findall(r'a href=\\"(\/viewer\/postView\.naver\?volumeNo=[^"]+)\\"', response)
         for link in news_links:
             url = "https://m.post.naver.com" + link
-            description = crawl_news(url)
-            description.append(description)
+            news_data = crawl_news(url)
+            news_list.append(news_data)
 
-    return description_list
+    return news_list
 
 def crawl_news(url):
     
@@ -83,21 +82,24 @@ def crawl_news(url):
     chrome_options.add_argument('--ignore-certificate-errors')
     # Chrome WebDriver 설정 (경로를 자신의 환경에 맞게 변경)
     driver = webdriver.Chrome(options=chrome_options)
-
     # 웹 페이지 로드
     driver.get(url)
 
     # 페이지가 로드되고 동적 콘텐츠가 로드될 시간을 기다림
-    time.sleep(3)
+    time.sleep(2)
 
     description = []
     try:
-        soup = BeautifulSoup(driver.page_source, 'html.parser')
-        elements = soup.select('div.se_textView span')
+        page = driver.page_source
+        soup = BeautifulSoup(page, 'html.parser')
+        title = soup.select_one('h3.se_textarea').get_text(strip=True)
+        date = soup.select_one('p.se_detail span.se_publishDate').get_text(strip=True)
+        elements = soup.select('p.se_textarea span')
         # 각 span 태그의 텍스트 추출
         for element in elements:
-            description.append(element.get)
-            
+            description.append(element.get_text(strip=True).replace('\xa0', ' '))
+        
+        news_data = {'title': title, 'date': date, 'description': description, 'url': url}            
             
     except Exception as e:
         print(f"본문을 추출할 수 없습니다: {e}")
@@ -105,19 +107,40 @@ def crawl_news(url):
     # 브라우저 종료
     driver.quit()
     
-    return description
+    return news_data
 
-
+def crawl_updated_news(url):
+    news_list = []
+    response = requests.get(url)
+    response.raise_for_status()
+    response.encoding = 'utf-8'
+    soup = BeautifulSoup(response.text, 'html.parser')
+    href_tags = soup.select('ul.list_spot_post._post_list a')
+    for tag in href_tags:
+        link = tag['href']
+        url = "https://m.post.naver.com" + link
+        news_data = crawl_news(url)
+        news_list.append(news_data)
+    
+    return news_list
 
 if __name__ == '__main__':
-    url = 'https://m.post.naver.com/my/series/detail.naver?memberNo=51653576&seriesNo=623989'
-    
+    soccer_url = 'https://m.post.naver.com/my/series/detail.naver?memberNo=51653576&seriesNo=623989'
+    baseball_url = 'https://m.post.naver.com/my/series/detail.naver?memberNo=51653576&seriesNo=623990'
+    basketball_rul = 'https://m.post.naver.com/my/series/detail.naver?memberNo=51653576&seriesNo=623991'
 
     # 중복된 프로세스 제거
-    process_kill("browsermob-proxy")
+    news_list = crawl_updated_news(baseball_url)
+    for news in news_list:
+        print(news)
 
 
+'''  
+process_kill("browsermob-proxy")
     xhr_responses = capture_network_traffic(url)
-    description_list = crawl_news_data(xhr_responses)
-    for data in description_list:
-        print(data)
+    news_list = crawl_news_list(xhr_responses)
+
+    for news in news_list:
+        print(news)
+        
+        '''
